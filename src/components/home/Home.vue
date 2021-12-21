@@ -1,13 +1,14 @@
 <template>
 <div>
   <h1 class="centralizado">{{ titulo }}</h1>
+  <p v-show="mensagem" class="centralizado">{{ mensagem }}</p>
   <input type="search" class="filtro" @input="filtro = $event.target.value" placeholder="filtre pelo titulo">
   {{ filtro }}
   <ul class="lista-fotos">
     <li class="lista-fotos-item" v-for="foto of fotosComFiltro">
 
       <meu-painel :titulo="foto.titulo">
-        <imagem-responsiva :url="foto.url" :titulo="foto.titulo" />
+        <imagem-responsiva v-meu-transform:scale.animate="1.5" :url="foto.url" :titulo="foto.titulo" />
         <meu-botao 
           tipo="button"
           rotulo="Remover" 
@@ -27,6 +28,8 @@
   import ImagemResponsiva from '../shared/imagem-responsiva/ImagemResponsiva.vue'
   import Botao from '../shared/botao/Botao.vue'
 
+  import transform from '../../directives/Transform';
+
   export default {
 
     components: {
@@ -39,8 +42,13 @@
       return {
         titulo: "Alurapic",
         fotos: [],
-        filtro: ''
+        filtro: '',
+        mensagem: ''
       }
+    },
+
+    directives: {
+      'meu-transform': transform
     },
 
     computed: {
@@ -57,7 +65,16 @@
     methods: {
       remove(foto) {
         
-          alert('Removeer a foto' + foto.titulo)
+          this.$http.delete(`http://localhost:3000/v1/fotos/${foto._id}`)
+          .then(
+            () => {
+              this.mensagem = 'Foto removida com sucesso'
+                let indice = this.fotos.indexOf(foto)
+                this.fotos.splice(indice, 1)
+              } , err => {
+                console.log(err)
+                this.mensagem = 'Não foi possivel remover a foto'
+          })
         
         
       }
@@ -67,7 +84,7 @@
       
       this.$http.get('http://localhost:3000/v1/fotos')
         .then(res => res.json())
-        .then(fotos => this.fotos = fotos, err => consolee.log(err));
+        .then(fotos => this.fotos = fotos, err => console.log(err));
 
     }
   }

@@ -58,4 +58,8 @@
 
     }
 
+    .painel-conteudo {
+    overflow: hidden;
+  }
+
 </style>
